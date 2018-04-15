@@ -70,8 +70,8 @@ public class Service {
         return examinedDAO.getEntities();
     }
 
-    public Examined saveExamined(Examined toughness) throws SQLException {
-        return examinedDAO.saveEntity(toughness);
+    public Examined saveExamined(Examined examined) throws SQLException {
+        return examinedDAO.saveEntity(examined);
     }
 
     public Examined updateExamined(Examined toughness) throws SQLException {
@@ -81,9 +81,16 @@ public class Service {
     public Examined getExaminedById(Integer id) throws SQLException {
         return examinedDAO.getEntityById(id);
     }
+    public Examined getEntityByGenotype(String genotype) throws SQLException {
+        return examinedDAO.getEntityByGenotype(genotype);
+    }
 
-    public Boolean deleteExaminedById(Integer id) throws SQLException {
+        public Boolean deleteExaminedById(Integer id) throws SQLException {
         return examinedDAO.deleteEntityById(id);
+    }
+
+    public Boolean deleteExaminedByGenotype(String genotype) throws SQLException {
+        return examinedDAO.deleteEntityByGenotype(genotype);
     }
 
     // History:

@@ -12,8 +12,9 @@ public class History extends Entity {
     public History() {
     }
 
-    public History(Integer examinedId, Date date) {
-        this.date = date;
+    public History(Integer examinedId) {
+        java.util.Date utilDate = new java.util.Date();
+        this.date = new Date(utilDate.getTime());
         this.examinedId = examinedId;
     }
     public History(Integer id, Date date, Integer examinedId) {

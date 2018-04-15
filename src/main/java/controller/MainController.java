@@ -6,7 +6,9 @@ import auxiliaryStructures.ProcedureHistory;
 import database.Service;
 import database.dao.DbConnection;
 import database.entity.Examined;
+import database.entity.Flagella;
 import database.entity.History;
+import database.entity.Toughness;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -42,9 +44,6 @@ public class MainController implements Initializable {
     public TableColumn<ProcedureHistory, Date> tableColumnClassifiedGenotypeDate;
 
     private DbConnection dbConnection;
-    private ResultSet rs;
-    private PreparedStatement ps;
-    private CallableStatement cs;
     private XmlParser xmlParser;
     private CustomMessageBox customMessageBox;
     private Service service;
@@ -93,85 +92,80 @@ public class MainController implements Initializable {
         updateHistory();
         updateExaminedView();
     }
+    public Examined nnAlgorithm(TestBacteria testBacteria) {
+        Double minDistance = Double.MAX_VALUE;
+        Double currentDistance=Double.MAX_VALUE;
+        List<Flagella> flagellaList = null;
+        List<Toughness> toughnessList = null;
 
-    public Examined NnAlgorithm(TestBacteria testBacteria) {
-        Examined bacteria = new Examined();
-        int firstDifference = Integer.MAX_VALUE;
-        int secondDifference = Integer.MAX_VALUE;
-        int searchAlpha = 0;
-        int searchBeta = 0;
-        int searchGamma = 0;
+        Flagella newFlagella = new Flagella();
+        Toughness newToughness = new Toughness();
+        Flagella nearestFlagella = null;
+        Toughness nearestToughness=null;
+        Examined examined = null ;
         try {
-            ps = dbConnection.getConnection().prepareStatement("SELECT alpha From flagella");
-            ps.execute();
-            rs = ps.getResultSet();
-            while (rs.next()) {
-                if (firstDifference > Math.abs(rs.getInt(1) - testBacteria.getAlpha())) {
-                    firstDifference = Math.abs(rs.getInt(1) - testBacteria.getAlpha());
-                    searchAlpha = rs.getInt(1);
-                }
-            }
-
-            ps = dbConnection.getConnection().prepareStatement("SELECT beta From flagella WHERE alpha=(?)");
-            ps.setInt(1, searchAlpha);
-            ps.execute();
-            rs = ps.getResultSet();
-            while (rs.next()) {
-                if (secondDifference > Math.abs(rs.getInt(1) - testBacteria.getBeta())) {
-                    secondDifference = Math.abs(rs.getInt(1) - testBacteria.getBeta());
-                    searchBeta = rs.getInt(1);
-                }
-            }
-
-            ps = dbConnection.getConnection().prepareStatement("SELECT number,id From flagella WHERE alpha=(?) AND beta=(?)");
-            ps.setInt(1, searchAlpha);
-            ps.setInt(2, searchBeta);
-            ps.execute();
-            rs = ps.getResultSet();
-            rs.next();
-            bacteria.setBclass(String.valueOf(rs.getInt(1)));
-            bacteria.setFlagellaId(rs.getInt(2));
-            //###########################################################################
-            firstDifference = Integer.MAX_VALUE;
-            secondDifference = Integer.MAX_VALUE;
-
-            ps = dbConnection.getConnection().prepareStatement("SELECT beta From toughness");
-            ps.execute();
-            rs = ps.getResultSet();
-            while (rs.next()) {
-                if (firstDifference > Math.abs(rs.getInt(1) - testBacteria.getBeta())) {
-                    firstDifference = Math.abs(rs.getInt(1) - testBacteria.getBeta());
-                    searchBeta = rs.getInt(1);
-                }
-            }
-
-            ps = dbConnection.getConnection().prepareStatement("SELECT gamma From toughness WHERE beta=(?)");
-            ps.setInt(1, searchBeta);
-            ps.execute();
-            rs = ps.getResultSet();
-            while (rs.next()) {
-                if (secondDifference > Math.abs(rs.getInt(1) - testBacteria.getGamma())) {
-                    secondDifference = Math.abs(rs.getInt(1) - testBacteria.getGamma());
-                    searchGamma = rs.getInt(1);
-                }
-            }
-
-            ps = dbConnection.getConnection().prepareStatement("SELECT  rank,id From toughness WHERE beta=(?) AND gamma=(?)");
-            ps.setInt(1, searchBeta);
-            ps.setInt(2, searchGamma);
-            ps.execute();
-            rs = ps.getResultSet();
-            rs.next();
-            bacteria.setGenotype(testBacteria.getGenotype().toString());
-            bacteria.setBclass(bacteria.getBclass().concat(rs.getString(1)));
-            bacteria.setToughnessId(rs.getInt(2));
+            System.out.println(testBacteria.getGenotype().toString());
+            examined = service.getEntityByGenotype(testBacteria.getGenotype().toString());
+            System.out.println(examined);
         } catch (SQLException e) {
-            e.printStackTrace();
         }
 
-        return bacteria;
-    }
+        try {
+            flagellaList = new ArrayList<>(service.getFlagellaList());
+            toughnessList = new ArrayList<>(service.getToughnessList());
 
+        } catch (SQLException e) {
+        }
+        for(Flagella flagella : flagellaList){
+            currentDistance= Math.sqrt(Math.pow((flagella.getAlpha()-testBacteria.getAlpha()),2)+Math.pow(flagella.getBeta()-testBacteria.getBeta(),2));
+            if(currentDistance<minDistance){
+                minDistance=currentDistance;
+                nearestFlagella = flagella;
+            }
+        }
+        newFlagella.setAlpha(testBacteria.getAlpha());
+        newFlagella.setBeta(testBacteria.getBeta());
+        newFlagella.setNumber(nearestFlagella.getNumber());
+        newFlagella.setId(nearestFlagella.getId());
+
+        minDistance=Double.MAX_VALUE;
+        for(Toughness toughness : toughnessList){
+            currentDistance= Math.sqrt(Math.pow((toughness.getBeta()-testBacteria.getBeta()),2)+Math.pow(toughness.getGamma()-testBacteria.getGamma(),2));
+            if(currentDistance<minDistance){
+                minDistance=currentDistance;
+                nearestToughness = toughness;
+            }
+        }
+        newToughness.setId(nearestToughness.getId());
+        newToughness.setBeta(testBacteria.getBeta());
+        newToughness.setGamma(testBacteria.getGamma());
+        newToughness.setRank(nearestToughness.getRank());
+
+
+
+        if (examined == null) {
+
+            examined = new Examined(testBacteria.getGenotype().toString(), String.valueOf(newFlagella.getNumber()) + newToughness.getRank(), newFlagella.getId(), newToughness.getId());
+            try {
+                service.saveExamined(examined);
+                service.saveHistory(new History(examined.getId()));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            examined.setBclass(String.valueOf(nearestFlagella.getNumber()) + nearestToughness.getRank());
+            examined.setFlagellaId(nearestFlagella.getId());
+            examined.setToughnessId(nearestToughness.getId());
+            try {
+                service.updateExamined(examined);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            updateHistory();
+
+        }
+        return examined;
+    }
 
     public void writeToXML_onAction(ActionEvent actionEvent) {
         File rootDirectory;
@@ -194,52 +188,60 @@ public class MainController implements Initializable {
     public void deleteFromHistory_onAction(ActionEvent actionEvent) {
         if (tableViewHistory.getSelectionModel().getSelectedItem() != null) {
             ProcedureHistory historyItem = tableViewHistory.getSelectionModel().getSelectedItem();
-            //service.deleteHistoryById(historyIte)
-            observableListProcedureHistory.remove(historyItem);
+            try {
+                service.deleteExaminedByGenotype(historyItem.getGenotype());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } observableListProcedureHistory.remove(historyItem);
         } else {
             customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja usunięcia nie powiedzie się.", "Powód: nie zaznaczono elementu.").showAndWait();
         }
     }
 
     public void classifyOneGenotype_onAction(ActionEvent actionEvent) {
-        TestBacteria testBacteria = new TestBacteria(Integer.parseInt(textFieldGenotype.getText()));
-        Examined examined = NnAlgorithm(testBacteria);
-        observableListExaminedBacterias.add(examined);
         try {
-            service.saveExamined(examined);
-            java.util.Date utilDate = new java.util.Date();
-            service.saveHistory(new History(examined.getId(), new Date(utilDate.getTime())));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        updateHistory();
-        updateExaminedView();
+            TestBacteria testBacteria = new TestBacteria(Integer.parseInt(textFieldGenotype.getText()));
+            Examined examined = nnAlgorithm(testBacteria);
+            observableListExaminedBacterias.add(examined);
+            updateHistory();
+            updateExaminedView();
+            try {
+                service.saveExamined(examined);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }catch(NumberFormatException|StringIndexOutOfBoundsException ex){
+            customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: wprowadzono niepoprawny format genotypu.").showAndWait();        }
+
 
     }
 
     public void addToWaitingList_onAction(ActionEvent actionEvent) {
-        TestBacteria testBacteria = new TestBacteria(Integer.parseInt(textFieldGenotype.getText()));
-        observableListWaitingList.add(testBacteria);
+        try {
+            TestBacteria testBacteria = new TestBacteria(Integer.parseInt(textFieldGenotype.getText()));
+            observableListWaitingList.add(testBacteria);
+        }catch(NumberFormatException|StringIndexOutOfBoundsException ex){
+            customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja dodania do kolejki nie powiodła  się.", "Powód: wprowadzono niepoprawny format genotypu").showAndWait();        }
     }
 
     public void classifyWaitingList_onAction(ActionEvent actionEvent) {
         try {
             dbConnection.getConnection().setAutoCommit(false);
             for (TestBacteria testBacteria : observableListWaitingList) {
-                Examined examined = NnAlgorithm(testBacteria);
+                Examined examined = nnAlgorithm(testBacteria);
                 observableListExaminedBacterias.add(examined);
                 try {
                     service.saveExamined(examined);
-                    java.util.Date utilDate = new java.util.Date();
-                    service.saveHistory(new History(examined.getId(), new Date(utilDate.getTime())));
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             }
             dbConnection.getConnection().commit();
             dbConnection.getConnection().setAutoCommit(true);
-        } catch (SQLException e) {
+        } catch (SQLException  e) {
             e.printStackTrace();
+        }catch (StringIndexOutOfBoundsException|NumberFormatException ex){
+            customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: wprowadzono niepoprwany format genotypu").showAndWait();
         }
         observableListWaitingList.clear();
         updateHistory();

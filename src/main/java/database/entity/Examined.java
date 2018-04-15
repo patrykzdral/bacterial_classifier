@@ -29,6 +29,13 @@ public class Examined extends Entity {
         this.bclass = bclass;
     }
 
+    public Examined(String genotype, String bclass, Integer flagellaId, Integer toughnessId) {
+        this.genotype = genotype;
+        this.bclass = bclass;
+        this.flagellaId=flagellaId;
+        this.toughnessId=toughnessId;
+    }
+
     public String getGenotype() {
         return genotype;
     }

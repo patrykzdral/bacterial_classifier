@@ -82,12 +82,37 @@ public class ExaminedDAO implements EntityCRUD<Examined> {
         return address;
     }
 
+    public Examined getEntityByGenotype(String genotype) throws SQLException {
+        String statement = "SELECT * FROM examined WHERE genotype=?";
+
+        PreparedStatement preparedStatement = dbConnection.getConnection().prepareStatement(statement);
+        preparedStatement.setString(1, genotype);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        resultSet.next();
+        Examined examined = new Examined(resultSet.getInt("id"), resultSet.getString("genotype"), resultSet.getString("class"),resultSet.getInt("flagella_id"),resultSet.getInt("toughness_id"));
+
+        preparedStatement.close();
+        return examined;
+    }
+
     @Override
     public Boolean deleteEntityById(int id) throws SQLException {
         String statement = "DELETE FROM examined WHERE id=?";
 
         PreparedStatement preparedStatement = dbConnection.getConnection().prepareStatement(statement);
         preparedStatement.setInt(1, id);
+
+        Boolean methodSucceeded = preparedStatement.executeUpdate() > 0;
+        preparedStatement.close();
+        return methodSucceeded;
+    }
+
+    public Boolean deleteEntityByGenotype(String genotype) throws SQLException {
+        String statement = "DELETE FROM examined WHERE genotype=?";
+
+        PreparedStatement preparedStatement = dbConnection.getConnection().prepareStatement(statement);
+        preparedStatement.setString(1, genotype);
 
         Boolean methodSucceeded = preparedStatement.executeUpdate() > 0;
         preparedStatement.close();

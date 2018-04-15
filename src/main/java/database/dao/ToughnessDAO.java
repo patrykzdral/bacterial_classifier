@@ -18,7 +18,7 @@ public class ToughnessDAO implements EntityCRUD<Toughness> {
     @Override
     public List<Toughness> getEntities() throws SQLException {
         List<Toughness> toughnessList = new ArrayList<>();
-        String statement = "SELECT * FROM flagella";
+        String statement = "SELECT * FROM toughness";
 
         PreparedStatement preparedStatement = dbConnection.getConnection().prepareStatement(statement);
         ResultSet resultSet = preparedStatement.executeQuery();
