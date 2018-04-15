@@ -1,14 +1,152 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
+<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="fxml.Main"
-            prefHeight="400.0" prefWidth="600.0">
-
-</AnchorPane>
+<VBox prefHeight="655.0" prefWidth="1001.0" styleClass="backgroundContainer" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+   <children>
+      <HBox alignment="CENTER" prefHeight="79.0" prefWidth="928.0">
+         <children>
+            <Label text="Klasyfikator bakterii">
+               <font>
+                  <Font size="72.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      <HBox prefHeight="573.0" prefWidth="1001.0">
+         <children>
+            <VBox prefHeight="550.0" prefWidth="500.0">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="53.0" prefWidth="499.0">
+                     <children>
+                        <Label text="Genotypy sklasyfikowane: ">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="431.0" prefWidth="499.0">
+                     <children>
+                        <TableView fx:id="tableViewHistory" prefHeight="310.0" prefWidth="468.0">
+                          <columns>
+                            <TableColumn fx:id="tableColumnClassifiedGenotype" prefWidth="75.0" text="genotype" />
+                            <TableColumn fx:id="tableColumnClassifiedGenotypeClass" prefWidth="75.0" text="class" />
+                              <TableColumn fx:id="tableColumnClassifiedGenotypeAlpha" prefWidth="52.0" text="alpha" />
+                              <TableColumn fx:id="tableColumnClassifiedGenotypeBeta" prefWidth="49.0" text="beta" />
+                              <TableColumn fx:id="tableColumnClassifiedGenotypeGamma" prefWidth="67.0" text="gamma" />
+                              <TableColumn fx:id="tableColumnClassifiedGenotypeDate" prefWidth="149.0" text="date" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </HBox>
+                  <Region prefHeight="11.0" prefWidth="502.0" />
+                  <HBox prefHeight="46.0" prefWidth="502.0">
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="46.0" prefWidth="257.0">
+                           <children>
+                              <Button fx:id="buttonSaveToXML" mnemonicParsing="false" onAction="#writeToXML_onAction" prefHeight="31.0" prefWidth="224.0" text="zapisz historię do pliku XML">
+                                  <font>
+                                      <Font name="System Bold" size="15.0" />
+                                  </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="46.0" prefWidth="234.0">
+                           <children>
+                              <Button fx:id="buttonDeleteFromHistory" mnemonicParsing="false" onAction="#deleteFromHistory_onAction" prefHeight="31.0" prefWidth="215.0" text="usuń z historii">
+                                  <font>
+                                      <Font name="System Bold" size="15.0" />
+                                  </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children></VBox>
+            <VBox alignment="CENTER" prefHeight="515.0" prefWidth="503.0">
+               <children>
+                  <HBox prefHeight="15.0" prefWidth="501.0">
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="31.0" prefWidth="236.0">
+                           <children>
+                              <Label text="Genotyp: ">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="31.0" prefWidth="190.0">
+                           <children>
+                              <TextField fx:id="textFieldGenotype" prefHeight="31.0" prefWidth="164.0" promptText="Genotyp do klasyfikacji" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="62.0" prefWidth="501.0">
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="62.0" prefWidth="257.0">
+                           <children>
+                              <Button fx:id="buttonClassifyOneGenotype" mnemonicParsing="false" onAction="#classifyOneGenotype_onAction" text="klasyfikuj pojedyńczy genotyp">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="62.0" prefWidth="273.0">
+                           <children>
+                              <Button fx:id="buttonAddToWaitingList" mnemonicParsing="false" onAction="#addToWaitingList_onAction" text="dodaj do listy oczekujujących">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="386.0" prefWidth="503.0">
+                     <children>
+                        <TableView fx:id="tableViewWaitingList" prefHeight="343.0" prefWidth="479.0">
+                          <columns>
+                            <TableColumn fx:id="tableColumnGenotype" prefWidth="113.0" text="genotyp" />
+                              <TableColumn fx:id="tableColumnGenotypeAlpha" prefWidth="105.0" text="alpha" />
+                              <TableColumn fx:id="tableColumnGenotypeBeta" prefWidth="113.0" text="beta" />
+                              <TableColumn fx:id="tableColumnGenotypeGamma" prefWidth="113.0" text="gamma" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </HBox>
+                  <Region prefHeight="11.0" prefWidth="502.0" />
+                  <HBox prefHeight="46.0" prefWidth="502.0">
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="46.0" prefWidth="257.0">
+                           <children>
+                              <Button fx:id="buttonClassifyWaitingList" mnemonicParsing="false" onAction="#classifyWaitingList_onAction" prefHeight="31.0" prefWidth="219.0" text="klasyfikuj liste oczekujących">
+                                  <font>
+                                      <Font name="System Bold" size="15.0" />
+                                  </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="46.0" prefWidth="234.0">
+                           <children>
+                              <Button fx:id="buttonDeleteFromWaitingList" mnemonicParsing="false" onAction="#deleteFromWaitingList_onAction" prefHeight="31.0" prefWidth="202.0" text="usuń z listy oczekujących">
+                                  <font>
+                                      <Font name="System Bold" size="15.0" />
+                                  </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>
