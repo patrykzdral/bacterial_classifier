@@ -78,7 +78,6 @@ public class MainController implements Initializable {
         tableViewHistory.setItems(observableListProcedureHistory);
 
         customMessageBox = new CustomMessageBox();
-
         service = new Service(ChooseDatabaseController.dbConnection);
         xmlParser = new XmlParser();
 
@@ -98,8 +97,11 @@ public class MainController implements Initializable {
         Flagella nearestFlagella = null;
         Toughness nearestToughness = null;
         Examined examined = null;
-        examined = service.getEntityByGenotype(testBacteria.getGenotype().toString());
+        try {
+            examined = service.getEntityByGenotype(testBacteria.getGenotype().toString());
+        }catch(SQLException e){
 
+        }
         flagellaList = new ArrayList<>(service.getFlagellaList());
         toughnessList = new ArrayList<>(service.getToughnessList());
 
@@ -185,6 +187,7 @@ public class MainController implements Initializable {
             try {
                 nnAlgorithm(testBacteria);
             } catch (SQLException e) {
+                e.printStackTrace();
                 customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: Błąd SQL").showAndWait();
             }
             updateExaminedView();
@@ -215,6 +218,7 @@ public class MainController implements Initializable {
             ChooseDatabaseController.dbConnection.getConnection().commit();
             ChooseDatabaseController.dbConnection.getConnection().setAutoCommit(true);
         } catch (SQLException e) {
+            e.printStackTrace();
             customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: Błąd SQL").showAndWait();
         } catch (StringIndexOutOfBoundsException | NumberFormatException ex) {
             customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: wprowadzono niepoprwany format genotypu").showAndWait();

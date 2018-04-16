@@ -84,8 +84,9 @@ public class ExaminedDAO implements EntityCRUD<Examined> {
 
     public Examined getEntityByGenotype(String genotype) throws SQLException {
         String statement = "SELECT * FROM examined WHERE genotype=?";
-
+        System.out.println(dbConnection.getConnection());
         PreparedStatement preparedStatement = dbConnection.getConnection().prepareStatement(statement);
+        System.out.println();
         preparedStatement.setString(1, genotype);
         ResultSet resultSet = preparedStatement.executeQuery();
 
