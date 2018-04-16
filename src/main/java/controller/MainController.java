@@ -1,10 +1,10 @@
 package controller;
 
+import auxiliaryStructures.ExaminedContainer;
+import auxiliaryStructures.ProcedureHistory;
 import auxiliaryStructures.TestBacteria;
 import customMessageBox.CustomMessageBox;
-import auxiliaryStructures.ProcedureHistory;
 import database.Service;
-import database.dao.DbConnection;
 import database.entity.Examined;
 import database.entity.Flagella;
 import database.entity.History;
@@ -16,13 +16,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
-import auxiliaryStructures.ExaminedContainer;
 import xml_parser.XmlParser;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Date;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -43,7 +43,6 @@ public class MainController implements Initializable {
     public TableColumn<ProcedureHistory, Integer> tableColumnClassifiedGenotypeGamma;
     public TableColumn<ProcedureHistory, Date> tableColumnClassifiedGenotypeDate;
 
-    private DbConnection dbConnection;
     private XmlParser xmlParser;
     private CustomMessageBox customMessageBox;
     private Service service;
@@ -62,17 +61,17 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        tableColumnGenotype.setCellValueFactory(new PropertyValueFactory<TestBacteria, Integer>("genotype"));
-        tableColumnGenotypeAlpha.setCellValueFactory(new PropertyValueFactory<TestBacteria, Integer>("alpha"));
-        tableColumnGenotypeBeta.setCellValueFactory(new PropertyValueFactory<TestBacteria, Integer>("beta"));
-        tableColumnGenotypeGamma.setCellValueFactory(new PropertyValueFactory<TestBacteria, Integer>("gamma"));
+        tableColumnGenotype.setCellValueFactory(new PropertyValueFactory<>("genotype"));
+        tableColumnGenotypeAlpha.setCellValueFactory(new PropertyValueFactory<>("alpha"));
+        tableColumnGenotypeBeta.setCellValueFactory(new PropertyValueFactory<>("beta"));
+        tableColumnGenotypeGamma.setCellValueFactory(new PropertyValueFactory<>("gamma"));
 
-        tableColumnClassifiedGenotype.setCellValueFactory(new PropertyValueFactory<ProcedureHistory, String>("genotype"));
-        tableColumnClassifiedGenotypeClass.setCellValueFactory(new PropertyValueFactory<ProcedureHistory, String>("bacteriaClass"));
-        tableColumnClassifiedGenotypeAlpha.setCellValueFactory(new PropertyValueFactory<ProcedureHistory, Integer>("alpha"));
-        tableColumnClassifiedGenotypeBeta.setCellValueFactory(new PropertyValueFactory<ProcedureHistory, Integer>("beta"));
-        tableColumnClassifiedGenotypeGamma.setCellValueFactory(new PropertyValueFactory<ProcedureHistory, Integer>("gamma"));
-        tableColumnClassifiedGenotypeDate.setCellValueFactory(new PropertyValueFactory<ProcedureHistory, Date>("date"));
+        tableColumnClassifiedGenotype.setCellValueFactory(new PropertyValueFactory<>("genotype"));
+        tableColumnClassifiedGenotypeClass.setCellValueFactory(new PropertyValueFactory<>("bacteriaClass"));
+        tableColumnClassifiedGenotypeAlpha.setCellValueFactory(new PropertyValueFactory<>("alpha"));
+        tableColumnClassifiedGenotypeBeta.setCellValueFactory(new PropertyValueFactory<>("beta"));
+        tableColumnClassifiedGenotypeGamma.setCellValueFactory(new PropertyValueFactory<>("gamma"));
+        tableColumnClassifiedGenotypeDate.setCellValueFactory(new PropertyValueFactory<>("date"));
 
 
         tableViewWaitingList.setItems(observableListWaitingList);
@@ -80,46 +79,34 @@ public class MainController implements Initializable {
 
         customMessageBox = new CustomMessageBox();
 
-        try {
-            dbConnection = new DbConnection();
-            service = new Service(dbConnection);
-            xmlParser = new XmlParser();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        service = new Service(ChooseDatabaseController.dbConnection);
+        xmlParser = new XmlParser();
+
+
         updateHistory();
         updateExaminedView();
     }
-    public Examined nnAlgorithm(TestBacteria testBacteria) {
+
+    private void nnAlgorithm(TestBacteria testBacteria) throws SQLException {
         Double minDistance = Double.MAX_VALUE;
-        Double currentDistance=Double.MAX_VALUE;
-        List<Flagella> flagellaList = null;
-        List<Toughness> toughnessList = null;
+        Double currentDistance = Double.MAX_VALUE;
+        List<Flagella> flagellaList;
+        List<Toughness> toughnessList;
 
         Flagella newFlagella = new Flagella();
         Toughness newToughness = new Toughness();
         Flagella nearestFlagella = null;
-        Toughness nearestToughness=null;
-        Examined examined = null ;
-        try {
-            System.out.println(testBacteria.getGenotype().toString());
-            examined = service.getEntityByGenotype(testBacteria.getGenotype().toString());
-            System.out.println(examined);
-        } catch (SQLException e) {
-        }
+        Toughness nearestToughness = null;
+        Examined examined = null;
+        examined = service.getEntityByGenotype(testBacteria.getGenotype().toString());
 
-        try {
-            flagellaList = new ArrayList<>(service.getFlagellaList());
-            toughnessList = new ArrayList<>(service.getToughnessList());
+        flagellaList = new ArrayList<>(service.getFlagellaList());
+        toughnessList = new ArrayList<>(service.getToughnessList());
 
-        } catch (SQLException e) {
-        }
-        for(Flagella flagella : flagellaList){
-            currentDistance= Math.sqrt(Math.pow((flagella.getAlpha()-testBacteria.getAlpha()),2)+Math.pow(flagella.getBeta()-testBacteria.getBeta(),2));
-            if(currentDistance<minDistance){
-                minDistance=currentDistance;
+        for (Flagella flagella : flagellaList) {
+            currentDistance = Math.sqrt(Math.pow((flagella.getAlpha() - testBacteria.getAlpha()), 2) + Math.pow(flagella.getBeta() - testBacteria.getBeta(), 2));
+            if (currentDistance < minDistance) {
+                minDistance = currentDistance;
                 nearestFlagella = flagella;
             }
         }
@@ -128,11 +115,11 @@ public class MainController implements Initializable {
         newFlagella.setNumber(nearestFlagella.getNumber());
         newFlagella.setId(nearestFlagella.getId());
 
-        minDistance=Double.MAX_VALUE;
-        for(Toughness toughness : toughnessList){
-            currentDistance= Math.sqrt(Math.pow((toughness.getBeta()-testBacteria.getBeta()),2)+Math.pow(toughness.getGamma()-testBacteria.getGamma(),2));
-            if(currentDistance<minDistance){
-                minDistance=currentDistance;
+        minDistance = Double.MAX_VALUE;
+        for (Toughness toughness : toughnessList) {
+            currentDistance = Math.sqrt(Math.pow((toughness.getBeta() - testBacteria.getBeta()), 2) + Math.pow(toughness.getGamma() - testBacteria.getGamma(), 2));
+            if (currentDistance < minDistance) {
+                minDistance = currentDistance;
                 nearestToughness = toughness;
             }
         }
@@ -142,29 +129,20 @@ public class MainController implements Initializable {
         newToughness.setRank(nearestToughness.getRank());
 
 
-
         if (examined == null) {
 
             examined = new Examined(testBacteria.getGenotype().toString(), String.valueOf(newFlagella.getNumber()) + newToughness.getRank(), newFlagella.getId(), newToughness.getId());
-            try {
-                service.saveExamined(examined);
-                service.saveHistory(new History(examined.getId()));
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            service.saveExamined(examined);
+            service.saveHistory(new History(examined.getId()));
         } else {
             examined.setBclass(String.valueOf(nearestFlagella.getNumber()) + nearestToughness.getRank());
             examined.setFlagellaId(nearestFlagella.getId());
             examined.setToughnessId(nearestToughness.getId());
-            try {
-                service.updateExamined(examined);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            service.updateExamined(examined);
+
             updateHistory();
 
         }
-        return examined;
     }
 
     public void writeToXML_onAction(ActionEvent actionEvent) {
@@ -173,7 +151,8 @@ public class MainController implements Initializable {
         dc.setTitle("Choose the root directory");
         rootDirectory = dc.showDialog(null);
         if (rootDirectory.isDirectory()) {
-            List<Examined> examined = new ArrayList<>(observableListExaminedBacterias);
+            List<Examined> examined;
+            examined = new ArrayList<>(observableListExaminedBacterias);
             ExaminedContainer examinedContainer = new ExaminedContainer();
             examinedContainer.setExaminedBacteriaList(examined);
             try {
@@ -192,7 +171,9 @@ public class MainController implements Initializable {
                 service.deleteExaminedByGenotype(historyItem.getGenotype());
             } catch (SQLException e) {
                 e.printStackTrace();
-            } observableListProcedureHistory.remove(historyItem);
+            }
+            updateHistory();
+            updateExaminedView();
         } else {
             customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja usunięcia nie powiedzie się.", "Powód: nie zaznaczono elementu.").showAndWait();
         }
@@ -201,17 +182,16 @@ public class MainController implements Initializable {
     public void classifyOneGenotype_onAction(ActionEvent actionEvent) {
         try {
             TestBacteria testBacteria = new TestBacteria(Integer.parseInt(textFieldGenotype.getText()));
-            Examined examined = nnAlgorithm(testBacteria);
-            observableListExaminedBacterias.add(examined);
-            updateHistory();
-            updateExaminedView();
             try {
-                service.saveExamined(examined);
+                nnAlgorithm(testBacteria);
             } catch (SQLException e) {
-                e.printStackTrace();
+                customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: Błąd SQL").showAndWait();
             }
-        }catch(NumberFormatException|StringIndexOutOfBoundsException ex){
-            customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: wprowadzono niepoprawny format genotypu.").showAndWait();        }
+            updateExaminedView();
+            updateHistory();
+        } catch (NumberFormatException | StringIndexOutOfBoundsException ex) {
+            customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: wprowadzono niepoprawny format genotypu.").showAndWait();
+        }
 
 
     }
@@ -220,27 +200,23 @@ public class MainController implements Initializable {
         try {
             TestBacteria testBacteria = new TestBacteria(Integer.parseInt(textFieldGenotype.getText()));
             observableListWaitingList.add(testBacteria);
-        }catch(NumberFormatException|StringIndexOutOfBoundsException ex){
-            customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja dodania do kolejki nie powiodła  się.", "Powód: wprowadzono niepoprawny format genotypu").showAndWait();        }
+        } catch (NumberFormatException | StringIndexOutOfBoundsException ex) {
+            customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja dodania do kolejki nie powiodła  się.", "Powód: wprowadzono niepoprawny format genotypu").showAndWait();
+        }
     }
 
     public void classifyWaitingList_onAction(ActionEvent actionEvent) {
         try {
-            dbConnection.getConnection().setAutoCommit(false);
+            ChooseDatabaseController.dbConnection.getConnection().setAutoCommit(false);
             for (TestBacteria testBacteria : observableListWaitingList) {
-                Examined examined = nnAlgorithm(testBacteria);
-                observableListExaminedBacterias.add(examined);
-                try {
-                    service.saveExamined(examined);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                nnAlgorithm(testBacteria);
+                updateExaminedView();
             }
-            dbConnection.getConnection().commit();
-            dbConnection.getConnection().setAutoCommit(true);
-        } catch (SQLException  e) {
-            e.printStackTrace();
-        }catch (StringIndexOutOfBoundsException|NumberFormatException ex){
+            ChooseDatabaseController.dbConnection.getConnection().commit();
+            ChooseDatabaseController.dbConnection.getConnection().setAutoCommit(true);
+        } catch (SQLException e) {
+            customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: Błąd SQL").showAndWait();
+        } catch (StringIndexOutOfBoundsException | NumberFormatException ex) {
             customMessageBox.showMessageBox(Alert.AlertType.WARNING, "Ostrzeżenie", "Operacja klasyfikacji nie powiodła  się.", "Powód: wprowadzono niepoprwany format genotypu").showAndWait();
         }
         observableListWaitingList.clear();

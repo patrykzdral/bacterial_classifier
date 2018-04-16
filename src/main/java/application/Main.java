@@ -20,11 +20,12 @@ public class Main extends Application
         try {
             setMainStage(primaryStage);
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("/fxml/main.fxml"));
+            loader.setLocation(getClass().getResource("/fxml/chooseDatabase.fxml"));
             loader.load();
             Parent root = loader.getRoot();
-            primaryStage.setScene(new Scene(root, 1001, 655));
+            primaryStage.setScene(new Scene(root, 600, 400));
             primaryStage.getIcons().add(new Image("/image/bacteria.png"));
+            primaryStage.setResizable(false);
             primaryStage.centerOnScreen();
 
 
@@ -36,8 +37,6 @@ public class Main extends Application
 
     @Override
     public void stop() {
-
-
         System.exit(0);
     }
 

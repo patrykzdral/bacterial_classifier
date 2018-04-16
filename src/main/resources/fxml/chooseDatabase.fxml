@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="396.0" prefWidth="565.0" styleClass="backgroundContainer" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ChooseDatabaseController">
+   <children>
+      <HBox alignment="CENTER" prefHeight="25.0" prefWidth="600.0">
+         <children>
+            <Label text="nazwa bazy danych">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="36.0" prefWidth="600.0">
+         <children>
+            <TextField fx:id="textFieldDataBaseName" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="25.0" prefWidth="600.0">
+         <children>
+            <Label text="adres ip serwera">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="36.0" prefWidth="600.0">
+         <children>
+            <TextField fx:id="textFieldTextFieldDataBaseIp" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="25.0" prefWidth="600.0">
+         <children>
+            <Label text="login użytkownika">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="36.0" prefWidth="600.0">
+         <children>
+            <TextField fx:id="textFieldDataBaseLogin" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="25.0" prefWidth="600.0">
+         <children>
+            <Label text="hasło użytkownika">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="36.0" prefWidth="600.0">
+         <children>
+            <PasswordField fx:id="textFieldDataBasePassword" />
+         </children>
+      </HBox>
+      <HBox prefHeight="155.0" prefWidth="600.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="155.0" prefWidth="303.0">
+               <children>
+                  <Button fx:id="buttonLoginToDefaultDataBase" mnemonicParsing="false" onAction="#loginToDefault_onAction" prefHeight="66.0" prefWidth="220.0" text="użyj domyślnej bazy danych">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                  </Button>
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="155.0" prefWidth="296.0">
+               <children>
+                  <Button fx:id="buttonLoginToNewDataBase" mnemonicParsing="false" onAction="#loginToNew_onAction" prefHeight="66.0" prefWidth="220.0" text="zaloguj się do podanej bazy">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                  </Button>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>
